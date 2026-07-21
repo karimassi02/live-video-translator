@@ -4,7 +4,7 @@ import logging
 import httpx
 
 from config import settings
-from translate.base import Translator
+from translate.base import TranslationContext, Translator
 
 log = logging.getLogger(__name__)
 
@@ -19,21 +19,24 @@ class DeepLTranslator(Translator):
             timeout=10.0,
         )
         # Cache simple : les partiels successifs répètent souvent le même début de phrase.
+        # Clé = texte seul : l'influence du contexte sur des partiels est marginale.
         self._cache: dict[str, str] = {}
 
-    async def translate(self, text: str) -> str:
+    async def translate(self, text: str, context: TranslationContext = ()) -> str:
         key = text.strip()
         if key in self._cache:
             return self._cache[key]
 
-        resp = await self._client.post(
-            "/v2/translate",
-            json={
-                "text": [text],
-                "source_lang": settings.source_lang.upper(),
-                "target_lang": settings.target_lang,
-            },
-        )
+        payload: dict = {
+            "text": [text],
+            "source_lang": settings.source_lang.upper(),
+            "target_lang": settings.target_lang,
+        }
+        if context:
+            # Le champ `context` (non facturé) améliore pronoms et cohérence.
+            payload["context"] = " ".join(src for src, _ in context)
+
+        resp = await self._client.post("/v2/translate", json=payload)
         resp.raise_for_status()
         result = resp.json()["translations"][0]["text"]
 
@@ -41,6 +44,10 @@ class DeepLTranslator(Translator):
             self._cache.clear()
         self._cache[key] = result
         return result
+
+    async def prewarm(self) -> None:
+        # /v2/usage est gratuit et suffit à établir la connexion TLS.
+        await self._client.get("/v2/usage")
 
     async def close(self) -> None:
         await self._client.aclose()

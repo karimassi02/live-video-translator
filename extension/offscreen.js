@@ -75,7 +75,7 @@ function connectBackend() {
   ws.onmessage = (event) => {
     let msg;
     try { msg = JSON.parse(event.data); } catch { return; }
-    if (msg.type === 'partial' || msg.type === 'final') {
+    if (msg.type === 'partial' || msg.type === 'final' || msg.type === 'final_update') {
       chrome.runtime.sendMessage({ target: 'background', cmd: 'relay-subtitle', payload: msg }).catch(() => {});
     } else if (msg.type === 'status') {
       reportStatus(msg.status, msg.detail);

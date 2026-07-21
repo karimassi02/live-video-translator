@@ -21,10 +21,12 @@ app = FastAPI(title="Live Video Translator")
 
 @app.get("/")
 async def health() -> dict:
+    final_engine = f"claude/{settings.claude_model}" if settings.final_translator == "claude" else "deepl"
+    partials = "deepl" if settings.translate_partials else "désactivés"
     return {
         "status": "ok",
         "stt": f"deepgram/{settings.deepgram_model}",
-        "translate": f"deepl {settings.source_lang}->{settings.target_lang}",
+        "translate": f"partiels: {partials}, finales: {final_engine} ({settings.source_lang}->{settings.target_lang})",
     }
 
 
@@ -33,11 +35,21 @@ async def audio_ws(ws: WebSocket) -> None:
     await ws.accept()
     log.info("Extension connectée")
 
-    if not settings.deepgram_api_key or not settings.deepl_api_key:
+    missing = [
+        name
+        for name, value in [
+            ("DEEPGRAM_API_KEY", settings.deepgram_api_key),
+            ("DEEPL_API_KEY", settings.deepl_api_key),
+        ]
+        if not value
+    ]
+    if settings.final_translator == "claude" and not settings.anthropic_api_key:
+        missing.append("ANTHROPIC_API_KEY")
+    if missing:
         await ws.send_json({
             "type": "status",
             "status": "error",
-            "detail": "Clés API manquantes : copie .env.example vers .env et renseigne-les",
+            "detail": f"Clés API manquantes ({', '.join(missing)}) : complète backend/.env",
         })
         await ws.close()
         return

@@ -9,11 +9,13 @@
   z-index: 2147483647;
 }
 
-#lvt-line {
-  display: inline-block;
+/* Une ligne de sous-titre (phrase finalisée, ou partiel « live »). */
+.lvt-line {
+  width: fit-content;
   max-width: 80%;
+  margin: 0.2em auto 0;
   padding: 0.35em 0.7em;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.85);
   border-radius: 6px;
   color: #ffffff;
   font: 600 28px/1.35 "Segoe UI", system-ui, sans-serif;
@@ -21,7 +23,7 @@
   white-space: pre-wrap;
 }
 
-#lvt-line.lvt-partial {
+.lvt-line.lvt-live {
   opacity: 0.85;
   font-style: italic;
 }

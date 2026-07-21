@@ -33,7 +33,10 @@ class DeepgramSTT(STTEngine):
             "interim_results": "true",
             "punctuate": "true",
             "smart_format": "true",
-            "endpointing": "300",
+            # smart_format peut retarder les finales (il attend du contexte pour
+            # formater nombres/dates) : no_delay force la finalisation immédiate.
+            "no_delay": "true",
+            "endpointing": str(settings.deepgram_endpointing),
         }
         url = f"{DEEPGRAM_WS}?{urlencode(params)}"
         self._ws = await connect(
