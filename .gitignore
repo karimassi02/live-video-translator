@@ -6,6 +6,7 @@ backend/.env
 
 # Environnement virtuel Python
 backend/.venv/
+backend/venv/
 
 # Caches Python
 __pycache__/
