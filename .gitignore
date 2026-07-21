@@ -1,0 +1,12 @@
+# Secrets — ne JAMAIS committer les clés API
+backend/.env
+
+# Config locale Claude Code (peut contenir des commandes approuvées avec secrets)
+.claude/
+
+# Environnement virtuel Python
+backend/.venv/
+
+# Caches Python
+__pycache__/
+*.pyc

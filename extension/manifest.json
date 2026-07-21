@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Live Video Translator",
+  "description": "Sous-titres traduits en direct pour la vidéo de l'onglet courant",
+  "version": "0.1.0",
+  "minimum_chrome_version": "116",
+  "permissions": ["tabCapture", "offscreen", "scripting", "activeTab", "storage"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Live Video Translator"
+  }
+}

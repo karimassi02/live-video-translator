@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 260px;
+        margin: 0;
+        padding: 14px;
+        font: 13px/1.5 "Segoe UI", system-ui, sans-serif;
+        background: #111827;
+        color: #f9fafb;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      #status {
+        margin-bottom: 12px;
+        color: #9ca3af;
+        min-height: 1.5em;
+        word-wrap: break-word;
+      }
+      #status.active { color: #4ade80; }
+      #status.error { color: #f87171; }
+      button {
+        width: 100%;
+        padding: 8px 0;
+        border: none;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover { background: #1d4ed8; }
+      button.running { background: #dc2626; }
+      button.running:hover { background: #b91c1c; }
+      .hint {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Live Video Translator</h1>
+    <div id="status">…</div>
+    <button id="toggle">Démarrer</button>
+    <div class="hint">Lance d'abord le backend local, puis démarre depuis l'onglet où la vidéo est ouverte.</div>
+    <script src="popup.js"></script>
+  </body>
+</html>
