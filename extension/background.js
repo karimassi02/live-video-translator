@@ -19,8 +19,8 @@ async function handleStart(tabId, streamId) {
   await chrome.storage.session.set({ running: true, tabId, status: 'starting', detail: null });
   await ensureOffscreenDocument();
   try {
-    await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+    await chrome.scripting.insertCSS({ target: { tabId, allFrames: true }, files: ['content.css'] });
+    await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, files: ['content.js'] });
   } catch (e) {
     console.warn('Injection du content script impossible', e);
   }
