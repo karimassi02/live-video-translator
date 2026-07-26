@@ -35,9 +35,41 @@ async function handleStop() {
   if (tabId) {
     chrome.tabs.sendMessage(tabId, { target: 'content', kind: 'stop' }).catch(() => {});
   }
+  await restoreWindowState();
   await chrome.storage.session.set({ running: false, status: null, detail: null });
   chrome.action.setBadgeText({ text: '' });
   try { await chrome.offscreen.closeDocument(); } catch {}
+}
+
+// Onglet capturé → Chromium rend le plein écran DANS l'onglet seulement
+// (« fullscreen within tab », crbug.com/350491). Pour un vrai plein écran
+// local, on bascule la fenêtre du navigateur elle-même.
+async function handlePageFullscreen(sender, isFull) {
+  const { running, tabId } = await getState();
+  if (!running || !sender.tab || sender.tab.id !== tabId) return;
+  if (isFull) {
+    const win = await chrome.windows.get(sender.tab.windowId);
+    if (win.state !== 'fullscreen') {
+      await chrome.storage.session.set({ prevWindowState: win.state, fsWindowId: win.id });
+      await chrome.windows.update(win.id, { state: 'fullscreen' });
+    }
+  } else {
+    await restoreWindowState();
+  }
+}
+
+async function restoreWindowState() {
+  const { prevWindowState, fsWindowId } = await chrome.storage.session.get({
+    prevWindowState: null,
+    fsWindowId: null,
+  });
+  if (fsWindowId === null) return;
+  await chrome.storage.session.remove(['prevWindowState', 'fsWindowId']);
+  try {
+    await chrome.windows.update(fsWindowId, { state: prevWindowState || 'maximized' });
+  } catch {
+    // Fenêtre fermée entre-temps : rien à restaurer.
+  }
 }
 
 async function handleStatus(status, detail) {
@@ -84,6 +116,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         break;
       case 'relay-subtitle':
         await relaySubtitle(msg.payload);
+        sendResponse({ ok: true });
+        break;
+      case 'page-fullscreen':
+        await handlePageFullscreen(sender, msg.full);
         sendResponse({ ok: true });
         break;
       default:

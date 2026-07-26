@@ -128,6 +128,10 @@
       fs ? `élément: ${fs.tagName}` : 'sortie du plein écran',
       '| frame:', isTopFrame ? 'principale' : 'iframe'
     );
+    // Onglet capturé → Chromium simule le plein écran DANS l'onglet
+    // (« fullscreen within tab ») : les barres du navigateur restent visibles.
+    // On demande au background de passer la fenêtre elle-même en plein écran.
+    chrome.runtime.sendMessage({ target: 'background', cmd: 'page-fullscreen', full: !!fs }).catch(() => {});
     render();
   });
 

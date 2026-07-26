@@ -26,6 +26,7 @@ Cas d'usage typique : regarder un contenu dans une langue avec des personnes qui
 ### Points techniques notables
 
 - **Plein écran** : l'overlay de sous-titres est re-greffé dynamiquement dans `document.fullscreenElement`, ce qui le garde visible quand le player passe en fullscreen.
+- **Plein écran pendant la capture** : Chromium confine le plein écran d'un onglet capturé à la zone de l'onglet (« fullscreen within tab », crbug.com/350491) — les barres du navigateur resteraient visibles. L'extension bascule donc automatiquement la fenêtre du navigateur en plein écran quand le player y passe, et restaure l'état en sortant.
 - **Audio préservé** : `tabCapture` coupe le son de l'onglet capturé ; le flux est rejoué vers la sortie audio pour une écoute normale.
 - **Affichage 2 lignes, apparition en bloc** : chaque phrase apparaît entière ~0,4 s après la fin de la réplique (détection de fin `DEEPGRAM_ENDPOINTING`, 200 ms par défaut + DeepL ~200 ms, connexions préchauffées au démarrage). Les deux dernières répliques restent empilées, chacune le temps d'être lue ; le texte d'une ligne est remplacé une seule fois quand la version Claude arrive. `TRANSLATE_PARTIALS=true` réactive une ligne « live » en italique qui s'écrit pendant la phrase.
 - **Quota-friendly** : partiels désactivés par défaut (DeepL quasi inutilisé), throttle + cache si on les réactive.
@@ -82,6 +83,7 @@ Vérification : ouvrir http://127.0.0.1:8710/ → `{"status": "ok", ...}`
 | Capture audio refusée sur un site | Rare (protection DRM stricte). Alternative prévue en roadmap : capture système WASAPI loopback |
 | Warning `Claude indisponible, repli DeepL` dans les logs | Clé `ANTHROPIC_API_KEY` invalide ou crédit épuisé → les finales repassent par DeepL (mot-à-mot) le temps de corriger |
 | Sous-titres invisibles en plein écran sur un site précis | Le site passe la balise `<video>` elle-même en fullscreen (cas rare) — la plupart des players passent un conteneur |
+| Plein écran confiné à l'onglet (barres du navigateur visibles) | Comportement Chromium sur onglet capturé, normalement compensé automatiquement. Si le plein écran était actif AVANT de démarrer la capture, ressortir puis remettre le plein écran |
 
 ## Coûts en pratique
 
